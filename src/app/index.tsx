@@ -1,44 +1,56 @@
+import { sendAudio } from "@/api/transitApi";
+import * as Speech from "expo-speech";
 import { useState } from "react";
-import { Button, Text, TextInput, View } from "react-native";
+import { Pressable, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { askAi } from "../api/transitApi";
+import { useRecorder } from "../hooks/useRecorder";
 export default function Index() {
-  const [question, setQuestion] = useState<string>("");
-  const [answer, setAnswer] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const { isRecording, startRecording, stopRecording } = useRecorder();
+  const [text, setText] = useState<string>("");
 
-  async function handleAsk() {
+  const handlePress = async () => {
     try {
-      setLoading(true);
+      if (isRecording) {
+        const uri = await stopRecording();
+        if (!uri) return;
 
-      const result = await askAi(question);
+        // Innan vi skickar, kan vi stoppa eventuellt pågående tal
+        Speech.stop();
 
-      setAnswer(result.answer);
-    } catch {
-      setAnswer("Something went wrong");
-    } finally {
-      setLoading(false);
+        const result = await sendAudio(uri);
+        setText(result.text);
+
+        // 2. Tvinga mobilen att läsa upp svaret på svenska!
+        Speech.speak(result.text, {
+          language: "sv", // Sätter språket till svenska
+          pitch: 1.0, // Tonhöjd (0.5 - 2.0)
+          rate: 1.0, // Hastighet (0.5 - 2.0)
+        });
+      } else {
+        // Om användaren startar en ny inspelning, tysta mobilen om den pratar
+        Speech.stop();
+        await startRecording();
+      }
+    } catch (err) {
+      console.log("handlePress error:", err);
     }
-  }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <TextInput
-        placeholder="Fråga SL AI..."
-        value={question}
-        onChangeText={setQuestion}
+      <Pressable
+        onPress={handlePress}
         style={{
-          borderWidth: 1,
-          padding: 12,
-          marginBottom: 12,
+          padding: 15,
+          backgroundColor: isRecording ? "red" : "green",
         }}
-      />
+      >
+        <Text style={{ color: "white" }}>
+          {isRecording ? "Stoppa inspelning" : "Starta tal"}
+        </Text>
+      </Pressable>
 
-      <Button title={loading ? "Laddar..." : "Fråga"} onPress={handleAsk} />
-
-      <View style={{ marginTop: 20 }}>
-        <Text>{answer}</Text>
-      </View>
+      <Text style={{ marginTop: 20 }}>Resultat: {text || "Inget ännu"}</Text>
     </SafeAreaView>
   );
 }
