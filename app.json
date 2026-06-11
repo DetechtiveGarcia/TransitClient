@@ -8,7 +8,10 @@
     "scheme": "transitfrontend",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app needs microphone access to record audio."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,8 +20,11 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": ["RECORD_AUDIO"],
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.transitfrontend"
     },
+
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
@@ -34,7 +40,9 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-image",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
