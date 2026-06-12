@@ -1,5 +1,5 @@
+import TransitScreen from "@/features/transit/TransitScreen";
 import { useEffect, useState } from "react";
-import Blob from "../components/Blob";
 
 export default function Index() {
   const [isReady, setIsReady] = useState(false);
@@ -18,5 +18,5 @@ export default function Index() {
     return null; // Ger appen en millisekund andrum innan ljudkomponenten laddas
   }
 
-  return <Blob />;
+  return <TransitScreen />;
 }
