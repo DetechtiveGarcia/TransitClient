@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Blob from "../../components/Blob";
+import InteractionOrb from "../../components/InteractionOrb";
 
 // TransitScreen.tsx
 export default function TransitScreen() {
@@ -22,7 +22,7 @@ export default function TransitScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.blobContainer}>
-        <Blob
+        <InteractionOrb
           isRecording={isRecording}
           onToggle={isRecording ? stopRecording : startRecording}
         />
