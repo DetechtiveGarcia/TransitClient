@@ -3,6 +3,7 @@ import { useRecorder } from "@/hooks/useRecorder";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
+import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Blob from "../../components/Blob";
 
@@ -31,7 +32,9 @@ export default function TransitScreen() {
         {isRecording ? (
           <DecibelMeter audioLevel={volumeSharedValue} />
         ) : (
-          <Text style={styles.text}>Tryck på SL logot för att prata</Text>
+          <Text style={styles.text}>
+            Tryck på SL-loggan för att ställa en fråga
+          </Text>
         )}
       </View>
     </SafeAreaView>
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    fontSize: 24,
+    fontSize: RFValue(15),
     fontWeight: "bold",
     color: "#334155",
     textAlign: "center",
