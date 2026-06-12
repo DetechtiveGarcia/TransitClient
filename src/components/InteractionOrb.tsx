@@ -1,8 +1,8 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native"; // <-- Import StyleSheet här
 import Animated, {
   Easing,
-  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -16,18 +16,13 @@ interface BlobProps {
   dbVolume?: number;
 }
 
-export default function Blob({
-  isRecording,
-  onToggle,
-  dbVolume = 0,
-}: BlobProps) {
+export default function InteractionOrb({ isRecording, onToggle }: BlobProps) {
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
   const skewX = useSharedValue(0);
   const skewY = useSharedValue(0);
   const colorProgress = useSharedValue(0);
 
-  // 1. Återställer dina organiska grundanimationer
   useEffect(() => {
     scale.value = withRepeat(
       withTiming(1.15, { duration: 400, easing: Easing.inOut(Easing.ease) }),
@@ -51,19 +46,11 @@ export default function Blob({
     );
   }, []);
 
-  // 2. Animerar färgen när isRecording ändras
   useEffect(() => {
     colorProgress.value = withTiming(isRecording ? 1 : 0, { duration: 300 });
   }, [isRecording]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    // Använder interpolateColor för en silkeslen färgövergång
-    const backgroundColor = interpolateColor(
-      colorProgress.value,
-      [0, 1],
-      ["rgb(40, 112, 240)", "rgb(239, 68, 68)"],
-    );
-
+  const animatedFormStyle = useAnimatedStyle(() => {
     return {
       width: 150,
       height: 150,
@@ -71,7 +58,6 @@ export default function Blob({
       borderTopRightRadius: 70 - skewY.value * 5,
       borderBottomRightRadius: 60 + skewX.value * 6,
       borderBottomLeftRadius: 65 - skewY.value * 7,
-      backgroundColor: backgroundColor,
       transform: [
         { scale: scale.value },
         { rotate: `${rotate.value}deg` },
@@ -86,9 +72,22 @@ export default function Blob({
       onPress={onToggle}
       style={{ alignItems: "center", justifyContent: "center" }}
     >
-      <Animated.View style={animatedStyle} />
+      <Animated.View style={[animatedFormStyle, { overflow: "hidden" }]}>
+        {/* Bas-gradient (Blå) */}
+        <LinearGradient
+          colors={["#0f6ee4", "#1d4ed8"]}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Overlay-gradient (Röd) som fadas in */}
+        <Animated.View style={[{ flex: 1, opacity: colorProgress }]}>
+          {/* eller #e46f0f? */}
+          <LinearGradient colors={["#a51e1e", "#dc2626"]} style={{ flex: 1 }} />
+        </Animated.View>
+      </Animated.View>
+
       <View style={{ position: "absolute" }} pointerEvents="none">
-        <SlLogo width={110} height={110} />
+        <SlLogo width={150} height={150} />
       </View>
     </Pressable>
   );
