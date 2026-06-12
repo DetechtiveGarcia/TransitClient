@@ -20,11 +20,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "permissions": ["RECORD_AUDIO"],
+      "permissions": [
+        "RECORD_AUDIO"
+      ],
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.transitfrontend"
     },
-
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
@@ -42,7 +43,8 @@
         }
       ],
       "expo-image",
-      "expo-audio"
+      "expo-audio",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

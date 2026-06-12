@@ -51,9 +51,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   text: {
-    fontSize: RFValue(15),
-    fontWeight: "bold",
+    fontSize: RFValue(18),
     color: "#334155",
     textAlign: "center",
+    fontFamily: "SpecialGothic_400Regular",
   },
 });
