@@ -48,7 +48,7 @@ export default function TransitScreen() {
 
         const text = response.text;
         setChatResponse(text);
-        setState(InteractionState.ANSWER);
+        setState(InteractionState.SPEAKING);
 
         Speech.speak(text, {
           language: "sv-SE",

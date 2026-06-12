@@ -2,6 +2,7 @@ export enum InteractionState {
   IDLE = "IDLE",
   RECORDING = "RECORDING",
   PROCESSING = "PROCESSING",
-  ANSWER = "ANSWER",
+  SPEAKING = "SPEAKING",
+  INTERRUPTED = "INTERRUPTED",
   ERROR = "ERROR",
 }
