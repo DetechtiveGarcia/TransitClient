@@ -1,48 +1,33 @@
-import { sendAudio } from "@/api/transitApi";
-import DecibelMeter from "@/components/DecibelMeter";
-import * as Speech from "expo-speech";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
   Easing,
-  SharedValue,
+  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
-import SlLogo from "../components/SlLogo";
-import { useRecorder } from "../hooks/useRecorder";
+import SlLogo from "./SlLogo";
 
-interface AudioBarProps {
-  volumeValue: SharedValue<number>;
-  multiplier: number;
-  index: number; // Ny: Används för att ge varje stapel en unik röst-rytm
+interface BlobProps {
+  isRecording: boolean;
+  onToggle: () => void;
+  dbVolume?: number;
 }
 
-export default function Blob() {
-  const { isRecording, startRecording, stopRecording, dbVolume } =
-    useRecorder();
-
+export default function Blob({
+  isRecording,
+  onToggle,
+  dbVolume = 0,
+}: BlobProps) {
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
   const skewX = useSharedValue(0);
   const skewY = useSharedValue(0);
-  const recordingProgress = useSharedValue(0);
+  const colorProgress = useSharedValue(0);
 
-  const volumeSharedValue = useSharedValue(0);
-
-  // Skjut in röstvolymen till Reanimateds UI-tråd
-  useEffect(() => {
-    if (isRecording) {
-      volumeSharedValue.value = dbVolume;
-    } else {
-      volumeSharedValue.value = 0;
-    }
-  }, [dbVolume, isRecording]);
-
-  // Den organiska bakgrundsbloben
+  // 1. Återställer dina organiska grundanimationer
   useEffect(() => {
     scale.value = withRepeat(
       withTiming(1.15, { duration: 400, easing: Easing.inOut(Easing.ease) }),
@@ -66,17 +51,18 @@ export default function Blob() {
     );
   }, []);
 
+  // 2. Animerar färgen när isRecording ändras
   useEffect(() => {
-    if (isRecording) {
-      recordingProgress.value = withTiming(1, { duration: 300 });
-    } else {
-      recordingProgress.value = withTiming(0, { duration: 300 });
-    }
+    colorProgress.value = withTiming(isRecording ? 1 : 0, { duration: 300 });
   }, [isRecording]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const animatedBackgroundColor =
-      recordingProgress.value > 0.5 ? "rgb(239, 68, 68)" : "rgb(40, 112, 240)";
+    // Använder interpolateColor för en silkeslen färgövergång
+    const backgroundColor = interpolateColor(
+      colorProgress.value,
+      [0, 1],
+      ["rgb(40, 112, 240)", "rgb(239, 68, 68)"],
+    );
 
     return {
       width: 150,
@@ -85,7 +71,7 @@ export default function Blob() {
       borderTopRightRadius: 70 - skewY.value * 5,
       borderBottomRightRadius: 60 + skewX.value * 6,
       borderBottomLeftRadius: 65 - skewY.value * 7,
-      backgroundColor: animatedBackgroundColor,
+      backgroundColor: backgroundColor,
       transform: [
         { scale: scale.value },
         { rotate: `${rotate.value}deg` },
@@ -95,89 +81,15 @@ export default function Blob() {
     };
   });
 
-  const handlePress = async () => {
-    try {
-      if (isRecording) {
-        const uri = await stopRecording();
-        if (!uri) return;
-
-        Speech.stop();
-        const result = await sendAudio(uri);
-
-        Speech.speak(result.text, {
-          language: "sv",
-          pitch: 1.0,
-          rate: 1.0,
-        });
-      } else {
-        Speech.stop();
-        await startRecording();
-      }
-    } catch (err) {
-      console.log("handlePress error:", err);
-    }
-  };
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.blobCenterContainer}>
-        <Pressable
-          onPress={handlePress}
-          style={{ alignItems: "center", justifyContent: "center" }}
-        >
-          <Animated.View
-            style={[
-              animatedStyle,
-              { alignItems: "center", justifyContent: "center" },
-            ]}
-          />
-          <View style={styles.logoContainer} pointerEvents="none">
-            <SlLogo width={110} height={110} />
-          </View>
-        </Pressable>
+    <Pressable
+      onPress={onToggle}
+      style={{ alignItems: "center", justifyContent: "center" }}
+    >
+      <Animated.View style={animatedStyle} />
+      <View style={{ position: "absolute" }} pointerEvents="none">
+        <SlLogo width={110} height={110} />
       </View>
-
-      <View style={styles.bottomContainer}>
-        {!isRecording ? (
-          <Text style={styles.text}>Tryck på SL logot för att prata</Text>
-        ) : (
-          <DecibelMeter />
-        )}
-      </View>
-    </SafeAreaView>
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, padding: 20 },
-  blobCenterContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoContainer: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bottomContainer: {
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingBottom: 20,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#334155",
-    textAlign: "center",
-  },
-  spectrumContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: 60,
-  },
-  audioBar: { width: 5, borderRadius: 3, backgroundColor: "rgb(239, 68, 68)" },
-});

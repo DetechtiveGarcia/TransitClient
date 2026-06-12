@@ -1,30 +1,21 @@
-import {
-    RecordingPresets,
-    requestRecordingPermissionsAsync,
-    useAudioRecorder,
-    useAudioRecorderState, // Vi använder den här för att läsa mätvärden
-} from "expo-audio";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+// DecibelMeter.tsx
+import { StyleSheet, View } from "react-native";
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  Easing,
+  SharedValue,
+  useAnimatedStyle,
+  withTiming,
 } from "react-native-reanimated";
 
-function DecibelBar({
-  volume,
-  multiplier,
-}: {
-  volume: any;
+interface DecibelBarProps {
+  level: SharedValue<number>; // Här säger vi exakt vad det är
   multiplier: number;
-}) {
-  const barStyle = useAnimatedStyle(() => {
-    // Om volume är undefined, sätt till 0
-    const val = volume.value || 0;
-    const calculatedHeight = 8 + val * multiplier * 2.5;
+}
 
+function DecibelBar({ level, multiplier }: DecibelBarProps) {
+  const barStyle = useAnimatedStyle(() => {
+    // Nu vet TS att level.value är ett nummer
+    const calculatedHeight = 8 + (level.value || 0) * multiplier * 2.5;
     return {
       height: withTiming(Math.max(8, calculatedHeight), {
         duration: 60,
@@ -32,79 +23,27 @@ function DecibelBar({
       }),
     };
   });
-
   return <Animated.View style={[styles.bar, barStyle]} />;
 }
 
-export default function DecibelMeter() {
-  const liveVolume = useSharedValue(0);
+interface DecibelMeterProps {
+  audioLevel: SharedValue<number>; // Även här
+}
 
-  // Vi skapar recordern med preset direkt
-  const recorder = useAudioRecorder({
-    ...RecordingPresets.HIGH_QUALITY,
-    isMeteringEnabled: true,
-  });
-  const state = useAudioRecorderState(recorder, 100);
-
-  useEffect(() => {
-    if (state?.metering !== undefined) {
-      // 1. dB ligger ofta mellan -160 (tyst) och 0 (max).
-      // Låt oss säga att allt under -60 dB är "tyst".
-      const db = Math.max(-60, Math.min(0, state.metering));
-
-      // 2. Mappa om från intervallet -60 till 0 till 0 till 30
-      const normalized = (db + 60) * 0.2;
-
-      liveVolume.value = normalized;
-    }
-  }, [state]);
-
-  useEffect(() => {
-    async function start() {
-      const { status } = await requestRecordingPermissionsAsync();
-      if (status !== "granted") return;
-
-      // ISTÄLLET FÖR ATT SKICKA KONFIGURATION HÄR:
-      // Använd recorder-objektets inbyggda egenskaper om möjligt,
-      // eller bara kör prepare utan argument om preset redan är satt vid skapandet.
-      try {
-        await recorder.prepareToRecordAsync();
-        await recorder.record();
-      } catch (e) {
-        console.log("Fel vid start:", e);
-      }
-    }
-
-    start();
-
-    return () => {
-      recorder.stop().catch(() => {});
-    };
-  }, []); // Körs en gång
-
+export default function DecibelMeter({ audioLevel }: DecibelMeterProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Rösttest</Text>
-      <View style={styles.spectrumContainer}>
-        <DecibelBar volume={liveVolume} multiplier={0.5} />
-        <DecibelBar volume={liveVolume} multiplier={1.2} />
-        <DecibelBar volume={liveVolume} multiplier={2.0} />
-        <DecibelBar volume={liveVolume} multiplier={2.0} />
-        <DecibelBar volume={liveVolume} multiplier={1.2} />
-        <DecibelBar volume={liveVolume} multiplier={0.5} />
-      </View>
+    <View style={styles.spectrumContainer}>
+      <DecibelBar level={audioLevel} multiplier={0.5} />
+      <DecibelBar level={audioLevel} multiplier={1.2} />
+      <DecibelBar level={audioLevel} multiplier={2.0} />
+      <DecibelBar level={audioLevel} multiplier={2.0} />
+      <DecibelBar level={audioLevel} multiplier={1.2} />
+      <DecibelBar level={audioLevel} multiplier={0.5} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8fafc",
-  },
-  title: { fontSize: 20, marginBottom: 20 },
   spectrumContainer: {
     flexDirection: "row",
     gap: 8,

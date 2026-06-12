@@ -7,53 +7,51 @@ import {
 import { useEffect, useState } from "react";
 
 export function useRecorder() {
-  const recordingOptions = RecordingPresets.HIGH_QUALITY;
-  const recorder = useAudioRecorder(recordingOptions);
-  const [isRecording, setIsRecording] = useState(false);
-  const [voiceVolume, setVoiceVolume] = useState(0);
+  // 1. Lägg till isMeteringEnabled här för att få faktiska värden om du vill ha det senare
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+  });
 
-  // Använd Expos inbyggda state-övervakare. Vi pollar var 60:e millisekund.
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0);
+
   const recorderState = useAudioRecorderState(recorder, 60);
 
   useEffect(() => {
-    if (isRecording && recorderState.isRecording) {
-      // Eftersom det nya API:et döljer rå dB, skapar vi en röstvåg
-      // vars intensitet styrs dynamiskt av inspelningens duration.
-      // Det gör att den inte upprepar sig statiskt, utan rör sig i vågor.
-      const timeFactor = Math.sin(recorderState.durationMillis / 200);
-      const dynamicVolume = Math.abs(timeFactor) * 60 + Math.random() * 40;
+    if (isRecording && recorderState.metering !== undefined) {
+      // Vi mappar om det faktiska dB-värdet från mikrofonen.
+      // Metering ligger ofta mellan -160 (tyst) och 0 (max).
+      // Vi sätter allt under -60 till 0.
+      const db = Math.max(-60, Math.min(0, recorderState.metering));
+      const normalized = (db + 60) * 0.2; // Mappar -60...0 till 0...12
 
-      setVoiceVolume(dynamicVolume);
+      setAudioLevel(normalized);
     } else {
-      setVoiceVolume(0);
+      setAudioLevel(0);
     }
-  }, [recorderState.durationMillis, isRecording]);
-
+  }, [recorderState.metering, isRecording]);
   const startRecording = async () => {
     try {
-      console.log("STARTING RECORDING");
       const { status } = await requestRecordingPermissionsAsync();
-      if (status !== "granted") {
-        console.log("NO MIC PERMISSION");
-        return;
-      }
+      if (status !== "granted") return;
 
       await recorder.prepareToRecordAsync();
-      recorder.record();
+      await recorder.record();
       setIsRecording(true);
     } catch (err) {
-      console.log("Start error:", err);
+      console.error("Start error:", err);
     }
   };
 
   const stopRecording = async () => {
     try {
-      recorder.stop();
+      await recorder.stop();
       setIsRecording(false);
-      setVoiceVolume(0);
+      setAudioLevel(0);
       return recorder.uri;
     } catch (err) {
-      console.log("Stop error:", err);
+      console.error("Stop error:", err);
       return null;
     }
   };
@@ -62,6 +60,6 @@ export function useRecorder() {
     isRecording,
     startRecording,
     stopRecording,
-    dbVolume: voiceVolume, // Exportera det dynamiska värdet till Blobben
+    audioLevel,
   };
 }
