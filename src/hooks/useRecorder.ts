@@ -15,7 +15,7 @@ export function useRecorder() {
   });
   const [isRecording, setIsRecording] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
-  const recorderState = useAudioRecorderState(recorder, 60);
+  const recorderState = useAudioRecorderState(recorder, 50);
 
   useEffect(() => {
     if (isRecording && recorderState.metering !== undefined) {
