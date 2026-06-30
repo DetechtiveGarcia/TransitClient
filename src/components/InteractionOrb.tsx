@@ -9,10 +9,17 @@ import SlLogo from "./SlLogo";
 
 interface BlobProps {
   appState: InteractionState;
-  onToggle: () => void;
+  onToggle?: () => void; // Gör den valfri eftersom vi kanske använder PTT
+  onPressIn?: () => void; // Ny prop för när man trycker ner
+  onPressOut?: () => void; // Ny prop för när man släpper
 }
 
-export default function InteractionOrb({ appState, onToggle }: BlobProps) {
+export default function InteractionOrb({
+  appState,
+  onToggle,
+  onPressIn,
+  onPressOut,
+}: BlobProps) {
   const { animatedBlobStyle, blueOpacity, redOpacity, blackOpacity } =
     useOrbAnimations(appState);
 
@@ -21,6 +28,8 @@ export default function InteractionOrb({ appState, onToggle }: BlobProps) {
   return (
     <Pressable
       onPress={onToggle}
+      onPressIn={onPressIn} // Kopplas till hookens start-funktion
+      onPressOut={onPressOut} // Kopplas till hookens stopp-funktion
       style={{ alignItems: "center", justifyContent: "center" }}
     >
       {/* Radarringen (syns endast under PROCESSING) */}
@@ -28,7 +37,7 @@ export default function InteractionOrb({ appState, onToggle }: BlobProps) {
 
       {/* Behåll samma form på huvudbehållaren */}
       <Animated.View style={[animatedBlobStyle, { overflow: "hidden" }]}>
-        {/* Lager 1: Blå Gradient (syns i IDLE / när appen pratar) */}
+        {/* Lager 1: Blå Gradient */}
         <Animated.View style={[StyleSheet.absoluteFill, blueOpacity]}>
           <LinearGradient
             colors={["#0f6ee4", "#1d4ed8"]}
@@ -36,7 +45,7 @@ export default function InteractionOrb({ appState, onToggle }: BlobProps) {
           />
         </Animated.View>
 
-        {/* Lager 2: Röd Gradient (syns under RECORDING) */}
+        {/* Lager 2: Röd Gradient */}
         <Animated.View style={[StyleSheet.absoluteFill, redOpacity]}>
           <LinearGradient
             colors={["#a51e1e", "#dc2626"]}
@@ -44,7 +53,7 @@ export default function InteractionOrb({ appState, onToggle }: BlobProps) {
           />
         </Animated.View>
 
-        {/* Lager 3: Svart (massiv färg eller gradient, syns under PROCESSING) */}
+        {/* Lager 3: Svart */}
         <Animated.View
           style={[
             StyleSheet.absoluteFill,
