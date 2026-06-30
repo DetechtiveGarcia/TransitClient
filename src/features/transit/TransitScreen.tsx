@@ -75,10 +75,7 @@ export default function TransitScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.blobContainer}>
-        <InteractionOrb
-          isRecording={state === InteractionState.RECORDING}
-          onToggle={handleToggle}
-        />
+        <InteractionOrb appState={state} onToggle={handleToggle} />
       </View>
       <View style={styles.bottomContainer}>
         {state === InteractionState.RECORDING ? (
