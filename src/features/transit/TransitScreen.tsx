@@ -1,14 +1,14 @@
+import DecibelMeter from "@/components/DecibelMeter";
+import InteractionOrb from "@/components/InteractionOrb";
+import { RichText } from "@/components/RichText";
+import { useInteraction } from "@/hooks/useInteraction";
+import { InteractionMode } from "@/types";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import Animated from "react-native-reanimated";
 import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import DecibelMeter from "@/components/DecibelMeter";
-import InteractionOrb from "@/components/InteractionOrb";
-import { useInteraction } from "@/hooks/useInteraction";
-import { InteractionMode } from "@/types";
 
 const modeOptions = [
   { label: "Manuellt läge", value: InteractionMode.MANUAL },
@@ -66,7 +66,7 @@ export default function TransitScreen() {
         ) : chatResponse ? (
           <Animated.View style={styles.textBox}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.text}>{chatResponse}</Text>
+              <RichText content={chatResponse} />
             </ScrollView>
           </Animated.View>
         ) : (
