@@ -6,7 +6,7 @@ import {
 } from "expo-audio";
 import { useEffect, useState } from "react";
 
-const API_URL = "http://192.168.1.130:5286";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export function useRecorder() {
   const recorder = useAudioRecorder({
@@ -68,7 +68,13 @@ export function useRecorder() {
     });
 
     if (!uploadResponse.ok) {
-      throw new Error("Backend svarade med fel");
+      // Läs ut feltexten som servern skickar med
+      const errorText = await uploadResponse.text();
+      console.error("Detaljerat fel från Azure:", errorText);
+
+      throw new Error(
+        `Backend svarade med fel: ${uploadResponse.status} - ${errorText}`,
+      );
     }
 
     return await uploadResponse.json();
