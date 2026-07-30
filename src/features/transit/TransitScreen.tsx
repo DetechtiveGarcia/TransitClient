@@ -2,14 +2,13 @@ import DecibelMeter from "@/components/DecibelMeter";
 import InteractionOrb from "@/components/InteractionOrb";
 import { RichText } from "@/components/RichText";
 import { useInteraction } from "@/hooks/useInteraction";
-import { InteractionMode } from "@/types";
+import { InteractionMode, SUPPORTED_LANGUAGES } from "@/types";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import Animated from "react-native-reanimated";
 import { RFValue } from "react-native-responsive-fontsize";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 const modeOptions = [
   { label: "Manuellt läge", value: InteractionMode.MANUAL },
   { label: "Push-To-Talk", value: InteractionMode.PUSH_TO_TALK },
@@ -28,6 +27,8 @@ export default function TransitScreen() {
     onPress,
     handlePttStart,
     handlePttEnd,
+    language,
+    setLanguage,
   } = useInteraction(selectedMode);
 
   // Avgör om vi är i PTT-läge för att binda om knapptrycken
@@ -35,19 +36,39 @@ export default function TransitScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerLeftContainer}>
-        <Dropdown
-          style={styles.dropdown}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          data={modeOptions}
-          maxHeight={150}
-          labelField="label"
-          valueField="value"
-          placeholder="Välj läge"
-          value={selectedMode}
-          onChange={(item) => setSelectedMode(item.value)}
-        />
+      {/* Header med två dropdowns: Läge till vänster, Språk i mitten/höger */}
+      <View style={styles.headerContainer}>
+        {/* Välj läge */}
+        <View style={styles.dropdownWrapper}>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={modeOptions}
+            maxHeight={150}
+            labelField="label"
+            valueField="value"
+            placeholder="Välj läge"
+            value={selectedMode}
+            onChange={(item) => setSelectedMode(item.value)}
+          />
+        </View>
+
+        {/* Välj språk */}
+        <View style={styles.dropdownWrapper}>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={SUPPORTED_LANGUAGES}
+            maxHeight={150}
+            labelField="label"
+            valueField="value"
+            placeholder="Välj språk"
+            value={language}
+            onChange={(item) => setLanguage(item.value)}
+          />
+        </View>
       </View>
 
       <View style={styles.blobContainer}>
@@ -59,7 +80,6 @@ export default function TransitScreen() {
         />
       </View>
 
-      {/* Uppdaterad bottomContainer med ScrollView för texten */}
       <View style={styles.bottomContainer}>
         {appState === "RECORDING" ? (
           <DecibelMeter audioLevel={audioLevel} />
@@ -83,12 +103,19 @@ export default function TransitScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  headerLeftContainer: {
+
+  // Uppdaterad header för att hantera fler element snyggt bredvid varandra
+  headerContainer: {
     position: "absolute",
     top: 50,
     left: 20,
+    right: 20,
     zIndex: 10,
-    width: 140,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dropdownWrapper: {
+    width: "48%", // Dela upp ytan så båda får plats
   },
   dropdown: {
     height: 40,
@@ -102,17 +129,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   placeholderStyle: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
     color: "#64748b",
   },
   selectedTextStyle: {
-    fontSize: RFValue(14),
+    fontSize: RFValue(13),
     color: "#0f6ee4",
     fontWeight: "600",
   },
   blobContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-
-  // Ökad höjd från 120 till 160 för att ge mer yta nertill
   bottomContainer: {
     height: 160,
     justifyContent: "center",
@@ -128,11 +153,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  text: {
-    fontSize: RFValue(16),
-    color: "#334155",
-    textAlign: "center",
   },
   instructionsText: {
     fontSize: RFValue(16),
