@@ -5,6 +5,7 @@ import { InteractionMode, InteractionState } from "../types";
 import { useRecorder } from "./useRecorder";
 
 export function useInteraction(mode: InteractionMode) {
+  const [language, setLanguage] = useState<string>("sv-SE");
   const [appState, setAppState] = useState<InteractionState>(
     InteractionState.IDLE,
   );
@@ -39,7 +40,7 @@ export function useInteraction(mode: InteractionMode) {
       setAppState(InteractionState.SPEAKING);
       const textForSpeech = cleanTextForSpeech(text);
       Speech.speak(textForSpeech, {
-        language: "sv-SE",
+        language: language,
         onDone: () => {
           setAppState(InteractionState.IDLE);
         },
@@ -138,6 +139,8 @@ export function useInteraction(mode: InteractionMode) {
     onPress,
     handlePttStart,
     handlePttEnd,
+    language,
+    setLanguage,
   };
 }
 
