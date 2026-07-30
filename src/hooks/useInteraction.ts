@@ -4,8 +4,6 @@ import { useSharedValue } from "react-native-reanimated";
 import { InteractionMode, InteractionState } from "../types";
 import { useRecorder } from "./useRecorder";
 
-const API_URL = "http://192.168.1.130:5286";
-
 export function useInteraction(mode: InteractionMode) {
   const [appState, setAppState] = useState<InteractionState>(
     InteractionState.IDLE,
@@ -36,13 +34,13 @@ export function useInteraction(mode: InteractionMode) {
     try {
       const response = await uploadAudio(audioFile);
       const text = response.text;
+      console.log(text);
       setChatResponse(text);
       setAppState(InteractionState.SPEAKING);
-
-      Speech.speak(text, {
+      const textForSpeech = cleanTextForSpeech(text);
+      Speech.speak(textForSpeech, {
         language: "sv-SE",
         onDone: () => {
-          setChatResponse(null);
           setAppState(InteractionState.IDLE);
         },
       });
@@ -141,4 +139,12 @@ export function useInteraction(mode: InteractionMode) {
     handlePttStart,
     handlePttEnd,
   };
+}
+
+function cleanTextForSpeech(text: string): string {
+  return text
+    .replace(/kl\./gi, "klockan")
+    .replace(/\*\*/g, "") // Tar bort fetstil (**)
+    .replace(/\*/g, "") // Tar bort kursiv (*)
+    .replace(/[-#_`]/g, " "); // Ersätter bindestreck, rubriker mm med paus/mellanslag
 }
