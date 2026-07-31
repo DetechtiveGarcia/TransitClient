@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TransitVoice Sthlm",
-    "slug": "transitvoice-sthlm",
+    "slug": "transitfrontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -61,6 +61,7 @@
       "eas": {
         "projectId": "07b653d5-2245-4eb9-be63-b93b923e05a4"
       }
-    }
+    },
+    "owner": "detectivegarcia"
   }
 }
