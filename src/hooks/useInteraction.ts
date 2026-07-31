@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Speech from "expo-speech";
 import { useEffect, useRef, useState } from "react";
 import { useSharedValue } from "react-native-reanimated";
@@ -24,7 +25,31 @@ export function useInteraction(mode: InteractionMode) {
     uploadAudio,
   } = useRecorder();
 
-  // Synka decibelnivån till UI:t (utan massa tystnadstimer-logik som spökar)
+  useEffect(() => {
+    const loadSavedLanguage = async () => {
+      try {
+        const savedLang = await AsyncStorage.getItem("@user_language");
+        if (savedLang) {
+          setLanguage(savedLang); // Använd vanliga setLanguage här!
+          console.log("Laddade sparat språk:", savedLang);
+        }
+      } catch (e) {
+        console.error("Kunde inte läsa in sparade språkvalet", e);
+      }
+    };
+    loadSavedLanguage();
+  }, []);
+
+  // Wrapper-funktion för att byta och spara språket automatiskt
+  const setLanguageStorage = async (newLang: string) => {
+    try {
+      await AsyncStorage.setItem("@user_language", newLang);
+      setLanguage(newLang);
+    } catch (e) {
+      console.error("Kunde inte spara språkvalet", e);
+    }
+  };
+
   useEffect(() => {
     volumeSharedValue.value = audioLevel;
   }, [audioLevel]);
@@ -81,7 +106,6 @@ export function useInteraction(mode: InteractionMode) {
   };
 
   const handleAbuelitaPress = async () => {
-    // Rensa eventuella gamla hängande timers innan vi påbörjar något nytt
     if (abuelitaTimerRef.current) {
       clearTimeout(abuelitaTimerRef.current);
       abuelitaTimerRef.current = null;
@@ -97,7 +121,6 @@ export function useInteraction(mode: InteractionMode) {
         "Abuelita: Inspelning startad. Schemalägger automatiskt stopp om 5 sekunder...",
       );
 
-      // Starta en bombsäker timer som stänger av inspelningen efter exakt 5 sekunder
       abuelitaTimerRef.current = setTimeout(async () => {
         console.log(
           "Abuelita: 5 sekunder har förflutit, stoppar inspelning automatiskt.",
@@ -107,9 +130,8 @@ export function useInteraction(mode: InteractionMode) {
         if (audioFile) {
           await processAudioAndRespond(audioFile);
         }
-      }, 5000); // 5 sekunder
+      }, 5000);
     } else if (appState === InteractionState.RECORDING) {
-      // Om användaren trycker på knappen för att stoppa i förtid
       console.log("Abuelita: Avbryter inspelning i förtid via knapptryck.");
 
       const audioFile = await stopRecording();
@@ -140,7 +162,7 @@ export function useInteraction(mode: InteractionMode) {
     handlePttStart,
     handlePttEnd,
     language,
-    setLanguage,
+    setLanguageStorage,
   };
 }
 

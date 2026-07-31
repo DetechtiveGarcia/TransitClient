@@ -28,7 +28,7 @@ export default function TransitScreen() {
     handlePttStart,
     handlePttEnd,
     language,
-    setLanguage,
+    setLanguageStorage,
   } = useInteraction(selectedMode);
 
   // Avgör om vi är i PTT-läge för att binda om knapptrycken
@@ -66,7 +66,7 @@ export default function TransitScreen() {
             valueField="value"
             placeholder="Välj språk"
             value={language}
-            onChange={(item) => setLanguage(item.value)}
+            onChange={(item) => setLanguageStorage(item.value)}
           />
         </View>
       </View>
