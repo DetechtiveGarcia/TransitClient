@@ -4,8 +4,8 @@ import Animated from "react-native-reanimated";
 
 import { useOrbAnimations } from "../hooks/useOrbAnimations";
 import { InteractionState } from "../types";
+import MicLogo from "./MicLogo";
 import { RadarRing } from "./RadarRing";
-import SlLogo from "./SlLogo";
 
 interface BlobProps {
   appState: InteractionState;
@@ -64,7 +64,7 @@ export default function InteractionOrb({
       </Animated.View>
 
       <View style={{ position: "absolute" }} pointerEvents="none">
-        <SlLogo width={150} height={150} />
+        <MicLogo width={150} height={150} />
       </View>
     </Pressable>
   );
