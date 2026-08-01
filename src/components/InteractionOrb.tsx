@@ -40,7 +40,7 @@ export default function InteractionOrb({
         {/* Lager 1: Blå Gradient */}
         <Animated.View style={[StyleSheet.absoluteFill, blueOpacity]}>
           <LinearGradient
-            colors={["#0f6ee4", "#1d4ed8"]}
+            colors={["#00132D", "#134386"]}
             style={StyleSheet.absoluteFill}
           />
         </Animated.View>
