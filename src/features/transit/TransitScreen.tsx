@@ -92,8 +92,8 @@ export default function TransitScreen() {
         ) : (
           <Text style={styles.instructionsText}>
             {isPtt
-              ? "Håll in SL-loggan för att prata, släpp för att skicka"
-              : "Tryck på SL-loggan för att ställa en fråga"}
+              ? "Håll in mickrofonen för att prata, släpp för att skicka"
+              : "Tryck på mickrofonen för att ställa en fråga"}
           </Text>
         )}
       </View>
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: RFValue(13),
-    color: "#0f6ee4",
+    color: "#134386",
     fontWeight: "600",
   },
   blobContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
