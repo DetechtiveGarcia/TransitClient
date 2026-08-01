@@ -7,6 +7,7 @@ import {
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Håller splash-screenen synlig tills typsnitten är klara
 SplashScreen.preventAutoHideAsync();
@@ -30,5 +31,9 @@ export default function RootLayout() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#00132D" }}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </SafeAreaView>
+  );
 }
