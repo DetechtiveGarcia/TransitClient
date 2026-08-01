@@ -8,7 +8,7 @@
     "scheme": "transitvoice-sthlm",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "buildNumber": 1,
+      "buildNumber": "1",
       "icon": "./assets/images/splash-icon.png",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app needs microphone access to record audio.",
