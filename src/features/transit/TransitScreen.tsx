@@ -82,7 +82,13 @@ export default function TransitScreen() {
 
       <View style={styles.bottomContainer}>
         {appState === "RECORDING" ? (
-          <DecibelMeter audioLevel={audioLevel} />
+          <>
+
+            <DecibelMeter audioLevel={audioLevel} />
+            <Text style={styles.instructionsText}>
+              Tryck igen för att avsluta inspelning
+            </Text>
+          </>
         ) : chatResponse ? (
           <Animated.View style={styles.textBox}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
